@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "axios"; // Make sure to import axios
 
-const Login = ({ switchToSignup, closeModal, onLoginSuccess }) => {
+const Login = ({ switchToSignup, closeModal }) => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -11,7 +10,6 @@ const Login = ({ switchToSignup, closeModal, onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
       const response = await axios.post(
         "https://academic-planner-backend.onrender.com/api/login",
@@ -21,21 +19,16 @@ const Login = ({ switchToSignup, closeModal, onLoginSuccess }) => {
         }
       );
 
+      // Save token
+      console.log("i am here");
       localStorage.setItem("token", response.data.token);
 
-      // Call the success handler with user data
-      onLoginSuccess({
-        name: response.data.name || response.data.email.split("@")[0],
-        email: response.data.email,
-      });
+      console.log("Login successful!");
+
+      closeModal(); // optional
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
-      alert(
-        error.response?.data?.message ||
-          "Login failed! Please check your credentials."
-      );
-    } finally {
-      setIsLoading(false);
+      alert("Login failed! Please check your credentials.");
     }
   };
 
@@ -64,17 +57,13 @@ const Login = ({ switchToSignup, closeModal, onLoginSuccess }) => {
           className="px-4 py-2 border rounded-lg"
           required
         />
-        <button
-          type="submit"
-          className="py-2 text-white rounded bg-primary hover:bg-blue-600 disabled:opacity-50"
-          disabled={isLoading}
-        >
-          {isLoading ? "Logging in..." : "Login"}
+        <button type="submit" className="py-2 text-white rounded bg-primary">
+          Login
         </button>
       </form>
 
       <p className="mt-4 text-sm text-center text-gray-600">
-        Don't have an account?{" "}
+        Don’t have an account?{" "}
         <button
           onClick={switchToSignup}
           className="font-medium text-primary hover:underline"

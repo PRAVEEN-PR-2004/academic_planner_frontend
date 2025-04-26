@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 
-const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
+const Signup = ({ switchToLogin, closeModal }) => {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -11,27 +9,31 @@ const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+
     try {
-      const response = await axios.post(
+      const response = await fetch(
         "https://academic-planner-backend.onrender.com/api/signup",
-        form
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        }
       );
 
-      localStorage.setItem("token", response.data.token);
+      const data = await response.json();
 
-      // Call the success handler with user data
-      onSignupSuccess({
-        name: response.data.name,
-        email: response.data.email,
-      });
-    } catch (error) {
-      console.error("Signup failed:", error.response?.data || error.message);
-      alert(
-        error.response?.data?.message || "Signup failed! Please try again."
-      );
-    } finally {
-      setIsLoading(false);
+      if (response.ok) {
+        localStorage.setItem("token", data.token); // Store JWT
+        alert(`Welcome, ${data.name}!`);
+        closeModal();
+      } else {
+        alert(`Signup failed: ${data.message}`);
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      alert("Something went wrong.");
     }
   };
 
@@ -44,7 +46,7 @@ const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <input
           name="name"
-          placeholder="Full Name"
+          placeholder="Name"
           value={form.name}
           onChange={handleChange}
           className="px-4 py-2 border rounded-lg"
@@ -52,7 +54,6 @@ const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
         />
         <input
           name="email"
-          type="email"
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
@@ -61,20 +62,15 @@ const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
         />
         <input
           name="password"
-          type="password"
           placeholder="Password"
+          type="password"
           value={form.password}
           onChange={handleChange}
           className="px-4 py-2 border rounded-lg"
           required
-          minLength="6"
         />
-        <button
-          type="submit"
-          className="py-2 text-white rounded bg-primary hover:bg-blue-600 disabled:opacity-50"
-          disabled={isLoading}
-        >
-          {isLoading ? "Creating account..." : "Sign Up"}
+        <button type="submit" className="py-2 text-white rounded bg-primary">
+          Sign Up
         </button>
       </form>
 

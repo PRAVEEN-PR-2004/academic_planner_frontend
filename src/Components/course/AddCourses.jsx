@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // <-- IMPORT THIS
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,7 +13,8 @@ const AddCourses = () => {
     task: "",
   });
 
-  const [loading, setLoading] = useState(false); // New loading state
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // <-- INITIALIZE HERE
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,7 +22,7 @@ const AddCourses = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -40,13 +42,10 @@ const AddCourses = () => {
       );
       console.log("Course created:", response.data);
       toast.success("Course successfully created!");
-      setForm({
-        courseName: "",
-        subjectName: "",
-        deadline: "",
-        chapters: "",
-        task: "",
-      });
+
+      setTimeout(() => {
+        navigate("/courses"); // <-- Navigate after a short delay
+      }, 1500); // 1.5 seconds delay to show success toast
     } catch (error) {
       console.error(
         "Error creating course:",
@@ -59,13 +58,12 @@ const AddCourses = () => {
         toast.error("Failed to create course. Try again.");
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen px-4 py-24 bg-gradient-to-br from-gray-50 to-gray-100 sm:px-6 lg:px-8">
-      {/* Toast Notifications */}
       <ToastContainer
         position="top-right"
         autoClose={3000}

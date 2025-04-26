@@ -22,11 +22,14 @@ const Courses = () => {
       const token = localStorage.getItem("token");
       setIsLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/courses/myCourses", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          "https://academic-planner-backend.onrender.com/courses/myCourses",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
           throw new Error("Failed to fetch courses");
@@ -49,7 +52,7 @@ const Courses = () => {
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(
-        `http://localhost:5000/courses/courses/${courseId}`,
+        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}`,
         {
           method: "DELETE",
           headers: {
@@ -76,7 +79,7 @@ const Courses = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/courses/courses/${courseId}/complete`,
+        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/complete`,
         {
           method: "PATCH",
           headers: {
@@ -108,7 +111,7 @@ const Courses = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/courses/courses/${courseId}/decreaseChapter`,
+        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/decreaseChapter`,
         {
           method: "PATCH",
           headers: {

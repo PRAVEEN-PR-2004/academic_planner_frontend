@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddCourses = () => {
   const [form, setForm] = useState({
@@ -10,14 +12,23 @@ const AddCourses = () => {
     task: "",
   });
 
+  const [loading, setLoading] = useState(false); // New loading state
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loading
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login to continue!");
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.post(
         "https://academic-planner-backend.onrender.com/courses/createCourse",
         form,
@@ -28,7 +39,7 @@ const AddCourses = () => {
         }
       );
       console.log("Course created:", response.data);
-      alert("Course successfully created!");
+      toast.success("Course successfully created!");
       setForm({
         courseName: "",
         subjectName: "",
@@ -41,12 +52,32 @@ const AddCourses = () => {
         "Error creating course:",
         error.response?.data || error.message
       );
-      alert("Failed to create course. Check console for details.");
+
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized! Please login to continue.");
+      } else {
+        toast.error("Failed to create course. Try again.");
+      }
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
   return (
     <div className="min-h-screen px-4 py-24 bg-gradient-to-br from-gray-50 to-gray-100 sm:px-6 lg:px-8">
+      {/* Toast Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -60,6 +91,7 @@ const AddCourses = () => {
         <div className="overflow-hidden bg-white shadow-xl rounded-2xl">
           <div className="p-6 sm:p-10">
             <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Form Fields */}
               <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -147,12 +179,14 @@ const AddCourses = () => {
                 </div>
               </div>
 
+              {/* Submit Button */}
               <div className="pt-4">
                 <button
                   type="submit"
+                  disabled={loading}
                   className="w-full px-8 py-3 text-lg font-medium text-white transition duration-200 rounded-lg shadow-md sm:w-auto bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
                 >
-                  Create Course
+                  {loading ? "Creating..." : "Create Course"}
                 </button>
               </div>
             </form>
